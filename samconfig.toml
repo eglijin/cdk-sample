@@ -1,0 +1,9 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "performance-metrics"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-5apo080pai08"
+s3_prefix = "performance-metrics"
+region = "us-west-2"
+capabilities = "CAPABILITY_IAM"

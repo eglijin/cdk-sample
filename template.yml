@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Performance Metrics
+
+Globals:
+  Function:
+    Timeout: 300
+    CodeUri: ./
+    Runtime: java11
+    MemorySize: 128
+    Environment:
+      Variables:
+        kmsKeyId: ""
+Resources:
+  #
+  PerformanceApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${AWS::StackName} Performance API"
+      Description: Server API
+      StageName: test
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          Parameters:
+            Location: ./api/apigw.yml
+  #
+  PerformanceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ap.Greeter
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: AllAtOnce # Or Canary10Percent5Minutes, Linear10PercentEvery1Minute, ...
+#      ProvisionedConcurrencyConfig:
+#        ProvisionedConcurrentExecutions: 3
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PerformanceApi
+            Path: /
+            Method: get
+  #
+Outputs:
+  PerformanceApi:
+    Description: "API Gateway endpoint URL for Issuing Microservice"
+    Value: !Sub "https://${PerformanceApi}.execute-api.${AWS::Region}.amazonaws.com/test"
