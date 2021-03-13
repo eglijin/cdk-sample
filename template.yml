@@ -33,8 +33,8 @@ Resources:
       AutoPublishAlias: live
       DeploymentPreference:
         Type: AllAtOnce # Or Canary10Percent5Minutes, Linear10PercentEvery1Minute, ...
-#      ProvisionedConcurrencyConfig:
-#        ProvisionedConcurrentExecutions: 3
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 3
       Events:
         ApiEvent:
           Type: Api
@@ -42,6 +42,26 @@ Resources:
             RestApiId: !Ref PerformanceApi
             Path: /
             Method: get
+#  PerformanceScalableTarget:
+#    Type: AWS::ApplicationAutoScaling::ScalableTarget
+#    Properties:
+#      MaxCapacity: 100
+#      MinCapacity: 5
+#      ResourceId: !Sub function:${PerformanceFunction}:live # You need to specify an alis or version here
+#      RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/lambda.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_LambdaConcurrency
+#      ScalableDimension: lambda:function:ProvisionedConcurrency
+#      ServiceNamespace: lambda
+#    DependsOn: PerformanceFunctionAliaslive # This is your function logical ID + "Alias" + what you use for AutoPublishAlias
+#  PersonCreateScalingPolicy:
+#    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+#    Properties:
+#      PolicyName: utilization
+#      PolicyType: TargetTrackingScaling
+#      ScalingTargetId: !Ref PerformanceScalableTarget
+#      TargetTrackingScalingPolicyConfiguration:
+#        TargetValue: 0.70 # Any value between 0.1 and 0.9 can be used here
+#        PredefinedMetricSpecification:
+#          PredefinedMetricType: LambdaProvisionedConcurrencyUtilization
   #
 Outputs:
   PerformanceApi:

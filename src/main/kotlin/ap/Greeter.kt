@@ -10,9 +10,10 @@ import kotlinx.coroutines.runBlocking
 class Greeter : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     override fun handleRequest(input: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent =
         runBlocking {
+            println("~${blocker/1000} cold start")
             APIGatewayProxyResponseEvent().withBody(
                 /*language=JSON*/
-                """{"message": "Hello after $blocker ms."}"""
+                """{"message": "Hello"}"""
             )
         }
 }
