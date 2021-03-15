@@ -1,1 +1,1 @@
-ab -k -c 6 -n 10000 https://ke21y4qag1.execute-api.us-west-2.amazonaws.com/test
+ab -k -c 3 -n 1000 https://ke21y4qag1.execute-api.us-west-2.amazonaws.com/test
