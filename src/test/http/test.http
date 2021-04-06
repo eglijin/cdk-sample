@@ -1,4 +1,4 @@
-GET https://ke21y4qag1.execute-api.us-west-2.amazonaws.com/test
+GET https://8lz7ijpsng.execute-api.us-west-2.amazonaws.com/prod
 Accept: application/json
 
 ###
