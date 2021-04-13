@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     application
     kotlin("jvm") version "1.4.31"
@@ -26,6 +28,7 @@ dependencies {
     implementation("software.amazon.awscdk:apigateway:$cdkVersion")
     implementation("software.amazon.awscdk:lambda:$cdkVersion")
     implementation("software.amazon.awscdk:cognito:$cdkVersion")
+    implementation("software.amazon.awscdk:lambda-event-sources:$cdkVersion")
 
     implementation("com.amazonaws:aws-lambda-java-runtime-interface-client:1.0.0")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
@@ -43,6 +46,14 @@ tasks {
     withType<Test> {
         useJUnitPlatform()
     }
+    withType<KotlinCompile> {
+        kotlinOptions {
+            useIR = true
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "11"
+        }
+    }
+
     create("copyRuntimeDependencies", Copy::class) {
         from(configurations.runtimeClasspath)
         into("$buildDir/dependency")

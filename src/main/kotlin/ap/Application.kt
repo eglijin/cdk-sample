@@ -10,35 +10,57 @@ import software.amazon.awscdk.services.apigateway.Resource
 import software.amazon.awscdk.services.cognito.UserPool
 import software.amazon.awscdk.services.lambda.*
 import software.amazon.awscdk.services.lambda.Function
+import software.amazon.awscdk.services.lambda.eventsources.ApiEventSource
 import software.amazon.awscdk.services.s3.Bucket
 
 
 fun main() {
     application {
         stack("performance-metrics") {
-//            SpecRestApi("PerformanceApi") {
-//                deploy(true)
-//                restApiName(Fn.sub("\${AWS::StackName} Performance API"))
-//                apiDefinition(ApiDefinition.fromAsset("./api/apigw.yml"))
-//            }
+            val api = SpecRestApi("PerformanceApi") {
+                apiDefinition(ApiDefinition.fromAsset("./api/apigw.yml"))
+                cloudWatchRole(true)
+                deploy(true)
+                deployOptions(
+                    StageOptions.builder()
+                        .stageName(environment)
+                        .build()
+                )
+                restApiName(Fn.sub("\${AWS::StackName} Performance API"))
+            }
 
             val function = dockerFunction("PerformanceFunction") {
-                code(DockerImageCode.fromImageAsset("./"))
-//                            events(
-//                                listOf(
-//                                    ApiEventSource("get", "/")
-//                                )
-//                            )
+                code(
+                    DockerImageCode.fromImageAsset(
+                        "./",
+                        AssetImageCodeProps.builder()
+                            .exclude(listOf("cdk*"))
+                            .ignoreMode(IgnoreMode.DOCKER)
+                            .cmd(listOf("ap.Greeter::handleRequest"))
+                            .build()
+                    )
+                )
+//                events(
+//                    listOf(
+//                        ApiEventSource(
+//                            "get",
+//                            "/",
+//                            MethodOptions.builder().build()
+//                        )
+//                    )
+//                )
             }
 
             val alias = Alias("live", function)
 
-            RestApi("PerformanceApi") {
-                get { LambdaIntegration { alias } }
-                resource("list") {
-                    get { LambdaIntegration { alias } }
-                }
-            }
+            LambdaIntegration { alias }
+//
+//            RestApi("PerformanceApi") {
+//                get { LambdaIntegration { alias } }
+//                resource("list") {
+//                    get { LambdaIntegration { alias } }
+//                }
+//            }
         }
     }
 }
