@@ -3,6 +3,7 @@
 package ap
 
 import software.amazon.awscdk.core.*
+import software.amazon.awscdk.core.CfnResource
 import software.amazon.awscdk.cxapi.CloudAssembly
 import software.amazon.awscdk.services.apigateway.*
 import software.amazon.awscdk.services.apigateway.IResource
@@ -10,15 +11,28 @@ import software.amazon.awscdk.services.apigateway.Resource
 import software.amazon.awscdk.services.cognito.UserPool
 import software.amazon.awscdk.services.lambda.*
 import software.amazon.awscdk.services.lambda.Function
-import software.amazon.awscdk.services.lambda.eventsources.ApiEventSource
 import software.amazon.awscdk.services.s3.Bucket
+import software.amazon.awscdk.services.s3.assets.Asset
+import software.amazon.awscdk.services.s3.assets.AssetProps
 
 
 fun main() {
     application {
         stack("performance-metrics") {
+
+            val apigwDefinition = Asset(this, "PerformanceAPIGW", AssetProps.builder().path("./api/apigw.yml").build())
+
             val api = SpecRestApi("PerformanceApi") {
-                apiDefinition(ApiDefinition.fromAsset("./api/apigw.yml"))
+                apiDefinition(
+                    ApiDefinition.fromInline(
+                        Fn.transform(
+                            "AWS::Include",
+                            mapOf<String, String>(
+                                "Location" to apigwDefinition.s3ObjectUrl
+                            )
+                        )
+                    )
+                )
                 cloudWatchRole(true)
                 deploy(true)
                 deployOptions(
@@ -34,7 +48,11 @@ fun main() {
                     DockerImageCode.fromImageAsset(
                         "./",
                         AssetImageCodeProps.builder()
-                            .exclude(listOf("cdk*"))
+                            .exclude(
+                                listOf(
+                                    "cdk*", ".aws-sam*", ".idea*"
+                                )
+                            )
                             .ignoreMode(IgnoreMode.DOCKER)
                             .cmd(listOf("ap.Greeter::handleRequest"))
                             .build()
@@ -53,7 +71,7 @@ fun main() {
 
             val alias = Alias("live", function)
 
-            LambdaIntegration { alias }
+//            LambdaIntegration { alias }
 //
 //            RestApi("PerformanceApi") {
 //                get { LambdaIntegration { alias } }
@@ -144,6 +162,7 @@ inline fun Construct.dockerFunction(
         .timeout(timeout)
         .apply(block)
         .build()
+        .also { (it.node.defaultChild as CfnResource).overrideLogicalId(id) }
 
 inline fun Construct.function(id: String, block: Function.Builder.() -> Unit = {}): Function =
     Function.Builder.create(this, id).apply(block).build()

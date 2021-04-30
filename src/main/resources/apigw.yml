@@ -1,0 +1,57 @@
+openapi: 3.0.1
+info:
+  title: Issuing Microservice Api
+  version: "1.0"
+tags:
+  - name: Performance
+paths:
+  /:
+    get:
+      tags:
+        - Performance
+      summary: Performance check
+      operationId: PerformanceCheck
+      responses:
+        "200":
+          description: 200 response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardsRetrieveResponse"
+        "300":
+          description: 300 response
+          content: { }
+        "400":
+          description: 400 response
+          content: { }
+        "500":
+          description: 500 response
+          content: { }
+      x-amazon-apigateway-request-validator: Validate body
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+        uri:
+          "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PerformanceFunction.Arn}:live/invocations"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+components:
+  schemas:
+    Response:
+      title: Response
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+x-amazon-apigateway-request-validators:
+  Validate body:
+    validateRequestParameters: false
+    validateRequestBody: true
+x-amazon-apigateway-gateway-responses:
+  BAD_REQUEST_BODY:
+    responseTemplates:
+      application/json: '{"error": [ { "category": "API_DATA", "code": "FORMAT_ERROR", "message": "Structural validation failed", "details": "$context.error.validationErrorString" } ] }'

@@ -18,7 +18,7 @@ repositories {
 }
 
 val ktorVersion = "1.5.2"
-val cdkVersion = "1.96.0"
+val cdkVersion = "1.101.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -28,7 +28,8 @@ dependencies {
     implementation("software.amazon.awscdk:apigateway:$cdkVersion")
     implementation("software.amazon.awscdk:lambda:$cdkVersion")
     implementation("software.amazon.awscdk:cognito:$cdkVersion")
-    implementation("software.amazon.awscdk:lambda-event-sources:$cdkVersion")
+    implementation("software.amazon.awscdk:s3:$cdkVersion")
+//    implementation("software.amazon.awscdk:lambda-event-sources:$cdkVersion")
 
     implementation("com.amazonaws:aws-lambda-java-runtime-interface-client:1.0.0")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
@@ -52,6 +53,9 @@ tasks {
             freeCompilerArgs = listOf("-Xjsr305=strict")
             jvmTarget = "11"
         }
+    }
+    clean {
+        delete = setOf("cdk.out")
     }
 
     create("copyRuntimeDependencies", Copy::class) {
