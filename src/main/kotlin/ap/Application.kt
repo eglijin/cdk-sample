@@ -37,7 +37,7 @@ fun main() {
                 deploy(true)
                 deployOptions(
                     StageOptions.builder()
-                        .stageName(environment)
+                        .stageName("performance")
                         .build()
                 )
                 restApiName(Fn.sub("\${AWS::StackName} Performance API"))
@@ -46,13 +46,21 @@ fun main() {
             val function = dockerFunction("PerformanceFunction") {
                 code(
                     DockerImageCode.fromImageAsset(
-                        "./",
+                        "./build",
                         AssetImageCodeProps.builder()
                             .exclude(
                                 listOf(
-                                    "cdk*", ".aws-sam*", ".idea*"
+                                    "distributions",
+                                    "kotlin",
+                                    "libs",
+                                    "reports",
+                                    "resources",
+                                    "scripts",
+                                    "tmp",
+                                    "test-results",
                                 )
                             )
+                            .file("Dockerfile")
                             .ignoreMode(IgnoreMode.DOCKER)
                             .cmd(listOf("ap.Greeter::handleRequest"))
                             .build()

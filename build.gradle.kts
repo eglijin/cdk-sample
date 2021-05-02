@@ -23,7 +23,7 @@ val cdkVersion = "1.101.0"
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
-    
+
     implementation("software.amazon.awscdk:core:$cdkVersion")
     implementation("software.amazon.awscdk:apigateway:$cdkVersion")
     implementation("software.amazon.awscdk:lambda:$cdkVersion")
@@ -55,12 +55,16 @@ tasks {
         }
     }
     clean {
-        delete = setOf("cdk.out")
+        delete += setOf("build", "cdk.out", ".aws-sam")
     }
 
-    create("copyRuntimeDependencies", Copy::class) {
+    register<Copy>("copyRuntimeDependencies") {
         from(configurations.runtimeClasspath)
         into("$buildDir/dependency")
     }
-    this["build"].dependsOn("copyRuntimeDependencies")
+    register<Copy>("copyDockerFile") {
+        from("Dockerfile")
+        into("$buildDir")
+    }
+    this["build"].dependsOn("copyRuntimeDependencies", "copyDockerFile")
 }
