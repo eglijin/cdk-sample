@@ -5,7 +5,52 @@ info:
 tags:
   - name: Performance
 paths:
-  /:
+  /{proxy+}:
+    options:
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+        - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: { }
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers:
+                Fn::Sub: "${AllowHeaders}"
+              method.response.header.Access-Control-Allow-Methods:
+                Fn::Sub: "${AllowMethods}"
+              method.response.header.Access-Control-Allow-Origin:
+                Fn::Sub: "${AllowOrigin}"
+              method.response.header.X-Frame-Options: '''"sameorigin" always;''',
+              method.response.header.X-XSS-Protection: '''"1; mode=block" always;''',
+              method.response.header.Strict-Transport-Security: '''"max-age=31536000; includeSubDomains" always;''',
+              method.response.header.X-Content-Type-Options: '''nosniff;'''
+            responseTemplates:
+              application/json: |
+                {}
+  /greeting:
     get:
       tags:
         - Performance
@@ -33,7 +78,7 @@ paths:
           default:
             statusCode: 200
         uri:
-          "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PerformanceFunction.Arn}:live/invocations"
+          "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GreeterFunction.Arn}:live/invocations"
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy
@@ -55,3 +100,11 @@ x-amazon-apigateway-gateway-responses:
   BAD_REQUEST_BODY:
     responseTemplates:
       application/json: '{"error": [ { "category": "API_DATA", "code": "FORMAT_ERROR", "message": "Structural validation failed", "details": "$context.error.validationErrorString" } ] }'
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+      gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
+      gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+      gatewayresponse.header.X-Frame-Options: "'\"sameorigin\" always;'"
+      gatewayresponse.header.X-XSS-Protection: "'\"1; mode=block\" always;'"
+      gatewayresponse.header.Strict-Transport-Security: "'\"max-age=31536000; includeSubDomains\" always;'"
+      gatewayresponse.header.X-Content-Type-Options: "'nosniff;'"

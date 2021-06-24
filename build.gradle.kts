@@ -18,7 +18,7 @@ repositories {
 }
 
 val ktorVersion = "1.5.2"
-val cdkVersion = "1.101.0"
+val cdkVersion = "1.109.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -29,7 +29,9 @@ dependencies {
     implementation("software.amazon.awscdk:lambda:$cdkVersion")
     implementation("software.amazon.awscdk:cognito:$cdkVersion")
     implementation("software.amazon.awscdk:s3:$cdkVersion")
-//    implementation("software.amazon.awscdk:lambda-event-sources:$cdkVersion")
+    implementation("software.amazon.awscdk:events-targets:$cdkVersion")
+    implementation("software.amazon.awscdk:lambda-event-sources:$cdkVersion")
+    implementation("software.amazon.awscdk:iam:$cdkVersion")
 
     implementation("com.amazonaws:aws-lambda-java-runtime-interface-client:1.0.0")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
@@ -57,14 +59,27 @@ tasks {
     clean {
         delete += setOf("build", "cdk.out", ".aws-sam")
     }
-
     register<Copy>("copyRuntimeDependencies") {
         from(configurations.runtimeClasspath)
-        into("$buildDir/dependency")
+        into("$buildDir/lambda/var/task/lib/")
+    }
+    register<Copy>("copyLambdaFunction") {
+        dependsOn("jar")
+        from("$buildDir/classes/kotlin/main")
+        into("$buildDir/lambda/var/task/")
     }
     register<Copy>("copyDockerFile") {
-        from("Dockerfile")
-        into("$buildDir")
+        from("$rootDir/Dockerfile")
+        into("$buildDir/lambda")
     }
-    this["build"].dependsOn("copyRuntimeDependencies", "copyDockerFile")
+    register<Copy>("copyResources") {
+        from("$buildDir/resources")
+        into("$buildDir/lambda/resources")
+    }
+    getByName("build").dependsOn(
+        "copyResources",
+        "copyLambdaFunction",
+        "copyRuntimeDependencies",
+        "copyDockerFile"
+    )
 }

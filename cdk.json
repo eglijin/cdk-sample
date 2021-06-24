@@ -1,5 +1,5 @@
 {
-  "app": "./gradlew clean build run --stacktrace",
+  "app": "./gradlew clean build run",
   "context": {
     "@aws-cdk/core:enableStackNameDuplicates": "true",
     "aws-cdk:enableDiffNoFail": "true",
