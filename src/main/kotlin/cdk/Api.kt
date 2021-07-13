@@ -69,12 +69,6 @@ fun ContextAwareStack.api(id: String, location: String, stageVariables: Map<Stri
             .build()
     )
     restApiName("$stackName $id")
-}.apply {
-    domain(
-        "${id}-domain",
-        "$stagePrefix${id.substringBefore(".")}$domainPrefix.$domain",
-        this
-    )
 }
 
 infix fun RestApiBase.post(path: String) =

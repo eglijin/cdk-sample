@@ -43,10 +43,6 @@ paths:
                 Fn::Sub: "${AllowMethods}"
               method.response.header.Access-Control-Allow-Origin:
                 Fn::Sub: "${AllowOrigin}"
-              method.response.header.X-Frame-Options: '''"sameorigin" always;''',
-              method.response.header.X-XSS-Protection: '''"1; mode=block" always;''',
-              method.response.header.Strict-Transport-Security: '''"max-age=31536000; includeSubDomains" always;''',
-              method.response.header.X-Content-Type-Options: '''nosniff;'''
             responseTemplates:
               application/json: |
                 {}
@@ -104,7 +100,3 @@ x-amazon-apigateway-gateway-responses:
       gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
       gatewayresponse.header.Access-Control-Allow-Methods: "'*'"
       gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-      gatewayresponse.header.X-Frame-Options: "'\"sameorigin\" always;'"
-      gatewayresponse.header.X-XSS-Protection: "'\"1; mode=block\" always;'"
-      gatewayresponse.header.Strict-Transport-Security: "'\"max-age=31536000; includeSubDomains\" always;'"
-      gatewayresponse.header.X-Content-Type-Options: "'nosniff;'"

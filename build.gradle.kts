@@ -18,7 +18,7 @@ repositories {
 }
 
 val ktorVersion = "1.5.2"
-val cdkVersion = "1.109.0"
+val cdkVersion = "1.111.0"
 
 dependencies {
     implementation(kotlin("stdlib"))
@@ -32,6 +32,7 @@ dependencies {
     implementation("software.amazon.awscdk:events-targets:$cdkVersion")
     implementation("software.amazon.awscdk:lambda-event-sources:$cdkVersion")
     implementation("software.amazon.awscdk:iam:$cdkVersion")
+    implementation("software.amazon.awscdk:route53:$cdkVersion")
 
     implementation("com.amazonaws:aws-lambda-java-runtime-interface-client:1.0.0")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.1")
